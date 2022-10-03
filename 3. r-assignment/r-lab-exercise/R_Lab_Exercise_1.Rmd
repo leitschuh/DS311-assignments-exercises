@@ -1,6 +1,6 @@
 ---
 title: "DS311 - Basic R Lab Exercise"
-author: "Your Name"
+author: "Maximilian Leitschuh"
 date: "8/23/2022"
 output:
   pdf_document: default
@@ -89,14 +89,16 @@ b <- as.double(500)
 c <- as.character(500)
 
 # Enter your code here!
-
+typeof(a)
+typeof(b)
+typeof(c)
 
 
 # Check the data type of the following variable
 d <- a / b
 
 # Enter your code here!
-
+typeof(d)
 
 
 ```
@@ -153,9 +155,13 @@ Hint: Check out the "letters" and "LETTERS" key words in R.
 
 ```{r}
 # Enter your code here.
+alphabet <- letters
+alphabet
+is.vector(alphabet)
 
-
-
+alphabet_matrix <- matrix(LETTERS, nrow = 2)
+alphabet_matrix
+is.matrix(alphabet_matrix)
 ```
 
 ### DataFrame
@@ -253,16 +259,17 @@ Once you finished and knit the RMarkdown file into html file, you should be able
 ```{r}
 # Write your code here!
 # Part a
-
+x <- 4
 
 # Part b
-
+y <- 12
 
 # Part c
-
+x
+y
 
 # Part d
-
+z <- y/x
 
 # Part e
 print(paste("y divided by x is equal to ", z))
