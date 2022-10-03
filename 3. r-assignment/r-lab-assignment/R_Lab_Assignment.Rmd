@@ -1,6 +1,6 @@
 ---
 title: "DS311 - R Lab Assignment"
-author: "Your Name"
+author: "Maximilian Leitschuh"
 date: "8/22/2022"
 output: 
   html_document:
@@ -35,22 +35,21 @@ a. Report the number of variables and observations in the data set.
 
 ```{r}
 # Enter your code here!
-
-
+variables <- ncol(mtcars)
+observations <- nrow(mtcars) 
 # Answer:
-print("There are total of _____ variables and _____ observations in this data set.")
-```
-
+print(paste("There are total of", variables, "variables and", observations,"observations in this data set."))
 
 
 b. Print the summary statistics of the data set and report how many discrete and continuous variables are in the data set.
 
 ```{r}
 # Enter your code here!
-
+summ <- summary(mtcars)
+summ
 
 # Answer:
-print("There are _____ discrete variables and _____ continuous variables in this data set.")
+print("There are 2 discrete variables and 9 continuous variables in this data set.")
 ```
 
 
@@ -59,11 +58,11 @@ c. Calculate the mean, variance, and standard deviation for the variable **mpg**
 
 ```{r}
 # Enter your code here!
+m <- mean(mtcars$mpg)
+v <- var(mtcars$mpg)
+s <- sd(mtcars$mpg)
 
-
-
-
-# print(paste("The average of Mile Per Gallon from this data set is ",  , " with variance ",  , " and standard deviation",  , "."))
+print(paste("The average of Mile Per Gallon from this data set is ", m , " with variance ", v , " and standard deviation", s , "."))
 ```
 
 
@@ -72,10 +71,11 @@ d. Create two tables to summarize 1) average mpg for each cylinder class and 2) 
 
 ```{r}
 # Enter your code here!
+tab1 <- aggregate(mtcars$mpg, list(cyl=mtcars$cyl), mean)
+tab1
 
-
-
-
+tab2 <- aggregate(mtcars$mpg, list(gear=mtcars$gear), sd)
+tab2
 ```
 
 
@@ -84,7 +84,6 @@ e. Create a crosstab that shows the number of observations belong to each cylind
 
 ```{r}
 # Enter your code here!
-
 
 print("The most common car type in this data set is car with ____ cylinders and ____ gears. There are total of _____ cars belong to this specification in the data set.")
 ```
@@ -119,10 +118,15 @@ Result:
 b. Using the **mtcars** data set, plot the histogram for the column **mpg** with 10 breaks. Give labels to the title, x-axis, and y-axis on the graph. Report the most observed mpg class from the data set.
 
 ```{r}
+hist(mtcars$mpg,
+     col='steelblue',
+     main='Histogram',
+     xlab='mpg',
+     breaks = 10,
+     ylab='Frequency')
 
 
-
-print("Most of the cars in this data set are in the class of ______ mile per gallon.")
+print("Most of the cars in this data set are in the class of 15 miles per gallon.")
 ```
 
 
