@@ -2,7 +2,8 @@
 title: "DS311 - R Lab Assignment"
 author: "Maximilian Leitschuh"
 date: "8/22/2022"
-output: 
+output:
+  pdf_document: default
   html_document:
     theme: united
     highlight: tango
@@ -11,6 +12,16 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+if (!require("arsenal")) install.packages("arsenal")
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("stats")) install.packages("stats")
+if (!require("crosstable")) install.packages("crosstable")
+library(arsenal)
+library(dplyr)
+library(ggplot2)
+library(stats)
+library(crosstable)
 ```
 
 ## R Assignment 1
@@ -43,7 +54,6 @@ print(paste("There are total of", variables, "variables and", observations,"obse
 
 #b. Print the summary statistics of the data set and report how many discrete and continuous variables are in the data set.
 
-```{r}
 # Enter your code here!
 summ <- summary(mtcars)
 summ
@@ -71,10 +81,14 @@ d. Create two tables to summarize 1) average mpg for each cylinder class and 2) 
 
 ```{r}
 # Enter your code here!
-tab1 <- aggregate(mtcars$mpg, list(cyl=mtcars$cyl), mean)
+tab1 <-mtcars%>%
+        group_by(cyl)%>%
+        summarize(average=mean(mpg))
 tab1
 
-tab2 <- aggregate(mtcars$mpg, list(gear=mtcars$gear), sd)
+tab2 <-mtcars%>%
+        group_by(gear)%>%
+        summarize(standardDeviation=sd(mpg))
 tab2
 ```
 
@@ -86,7 +100,7 @@ e. Create a crosstab that shows the number of observations belong to each cylind
 # Enter your code here!
 cross <- crosstable(mtcars, cols=c(cyl), by=c(gear), total = "row")
 cross
-print("The most common car type in this data set is car with 8 cylinders and 3 gears. There are total of 12 cars belong to this specification in the data set.")
+print("The most common car type in this data set is car with 8 cylinders and 3 gears. There are total of 12 cars belong  to this specification in the data set.")
 ```
 
 
@@ -106,18 +120,17 @@ data("PlantGrowth")
 head(PlantGrowth)
 
 # Enter your code here!
-ggplot(PlantGrowth, aes(x=reorder(group,-weight), y=weight), fun.y = "mean") +
-  geom_bar(stat="identity", fill="steelblue")+
+ggplot(PlantGrowth, aes(x=reorder(group,-weight), y=weight),stat = "summary") +
+  geom_bar(stat="summary", fill="steelblue", fun="mean")+
   labs(y="mean weight", x="groups")+
   ggtitle("Mean weight of the groups")+
-  scale_y_continuous(breaks = seq(0,50,10))+
+  scale_y_continuous(breaks = seq(0,6,1))+
   theme(plot.title = element_text(hjust=0.5, face="bold"))
-
 ```
 
 Result:
 
-=> On average, plants in group "trt2" weigh the most at just under 55 pounds. This is followed by the plants of group "ctrl" with about 50 pounds and the lightest are the plants of group "trt1" with an average of 46 pounds. 
+=> On average, plants in group "trt2" weigh the most with around 5.5 pound. This is followed by the plants of group "ctrl" with about 5 pounds and the lightest are the plants of group "trt1" with an average of around 4.6 pounds. 
 
 
 
@@ -171,7 +184,7 @@ download.file(url='https://www.jaredlander.com/data/housing.csv',
 housingData <- read.csv('housing.csv')
 housingData <- subset(housingData, 
                       select = c("Neighborhood", "Market.Value.per.SqFt", "Boro", "Year.Built"))
-housingData <- na.omit(housingData)                   
+housingData <- na.omit(housingData)                  
 ```
 
 a. Create your own descriptive statistics and aggregation tables to summarize the data set and find any meaningful results between different variables in the data set.
@@ -181,8 +194,24 @@ a. Create your own descriptive statistics and aggregation tables to summarize th
 head(housingData)
 
 # Enter your code here!
+#descriptive statistics
+summary(housingData)
 
+#Mean market value per sqft in the different boroughs of new york
+value_boroughs <- aggregate(housingData$Market.Value.per.SqFt, list(housingData$Boro), FUN=mean)
+value_boroughs[order(value_boroughs$x, decreasing = TRUE),]
 
+#Mean market value per sqft in the 5 most expensive neighborhoods of new york
+value_neighborhood <- aggregate(housingData$Market.Value.per.SqFt, list(housingData$Neighborhood), FUN=mean)
+top5_neighborhoods <- value_neighborhood[order(value_neighborhood$x, decreasing = TRUE)[1:5],]
+colnames(top5_neighborhoods) <- c("Neighborhood","mean")
+top5_neighborhoods
+
+#information of the most expensive building
+housingData[which.max(housingData$Market.Value.per.SqFt),]
+
+#information of the most cheapest building
+housingData[which.min(housingData$Market.Value.per.SqFt),]
 ```
 
 b. Create multiple plots to demonstrates the correlations between different variables. Remember to label all axes and give title to each graph.
@@ -190,11 +219,38 @@ b. Create multiple plots to demonstrates the correlations between different vari
 ```{r}
 # Enter your code here!
 
+#plot 1 - Mean market value per sqft in the different boroughs of new york
+ggplot(housingData, aes(x=reorder(Boro,-Market.Value.per.SqFt), y=Market.Value.per.SqFt)) +
+  geom_bar(stat = "summary", fill="steelblue")+
+  labs(y="mean market value per sqft", x="boroughs")+
+  ggtitle("Mean market value per sqft in the different boroughs of new york")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
+
+#plot 2 - Mean market value per sqft in the top 5 most expensive neighborhoods of new york
+ggplot(top5_neighborhoods, aes(x=reorder(Neighborhood,-mean), y=mean)) +
+  geom_bar(stat = "identity", fill="steelblue")+
+  labs(y="mean market value per sqft", x="neighborhoods")+
+  ggtitle("Mean market value per sqft in the different neighborhoods of new york")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
+
+#plot 3 - histogram distribution of the market value per sqft
+ggplot(data=housingData, aes(x=Market.Value.per.SqFt))+
+  geom_histogram(fill="steelblue", bins=30)+
+  labs(y="frequency", x="market value per sqft")+
+  ggtitle("Distribution of the market value per sqft in new york")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
+
+#plot 4 - histogram distribution of the years the buildings were built
+ggplot(data=housingData, aes(x=Year.Built))+
+  geom_histogram(fill="steelblue", bins=30)+
+  labs(y="frequency", x="year built")+
+  ggtitle("Distribution of the years the buildings were built in new york")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
 
 ```
 
 c. Write a summary about your findings from this exercise.
 
-=> Enter your answer here!
+=> Manhattan is by far the most expensive borough in New York with around 189 dollar market value per square feet. On the second place is Brooklyn with around 80 dollar market value per square feet and on the third place is Queens with around 77 dollar market value per square feet. Midtown, Flatiron, Midtown West, Upper East Side and Chelsea are the most expensive neighborhoods in New York and they are all in Manhattan. So, it makes sense that Manhattan is the most expensive borough in New York. Their average market value per square feet is with around 230 dollar way higher than the average in Manhattan. So those are the best neighborhoods in Manhattan. In general, the most buildings have a market value per square feet from around 100$ and were build around 2000.
 
 
